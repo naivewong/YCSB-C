@@ -12,6 +12,8 @@
 #include <vector>
 #include <string>
 
+#include "core/properties.h"
+
 namespace ycsbc {
 
 class DB {
@@ -20,6 +22,19 @@ class DB {
   static const int kOK = 0;
   static const int kErrorNoData = 1;
   static const int kErrorConflict = 2;
+  // Added by Alec: keep consistent with YCSB.
+  static const int kError = 3;               // The operation failed.
+  static const int kNotFound = 4;            // The requested record was not found.
+  static const int kNotImplemented = 5;
+  static const int kUnexpectedState = 6;     // The operation reported success, but the result was not as expected.
+  static const int kBadRequest = 7;          // The request was not valid.
+  static const int kForbidden = 8;
+  static const int kServiceUnavailable = 10; // Dependant service for the current binding is not available.
+  static const int kBatchedOK = 11;          // The operation has been batched by the binding to be executed later.
+
+  utils::Properties props_;
+  void set_properties(const utils::Properties& props) { props_ = props; }
+  utils::Properties get_properties() { return props_; }
   ///
   /// Initializes any state for accessing this DB.
   /// Called once per DB client (thread); there is a single DB instance globally.

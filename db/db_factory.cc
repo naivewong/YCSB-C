@@ -6,6 +6,9 @@
 //  Copyright (c) 2014 Jinglei Ren <jinglei@ren.systems>.
 //
 
+#include "core/db_wrapper.h"
+#include "core/measurements.h"
+#include "core/properties.h"
 #include "db/db_factory.h"
 
 #include <string>
@@ -27,7 +30,13 @@ DB* DBFactory::CreateDB(utils::Properties &props) {
   } else if (props["dbname"] == "redis") {
     int port = stoi(props["port"]);
     int slaves = stoi(props["slaves"]);
-    return new RedisDB(props["host"].c_str(), port, slaves);
+    utils::Properties p;
+    p.SetProperty("measurement.histogram.verbose", "true");
+    p.SetProperty("hdrhistogram.fileoutput", "true");
+    p.SetProperty("hdrhistogram.output.path", "./");
+    Measurements::set_properties(p);
+    return new DBWrapper(std::shared_ptr<DB>(new RedisDB(props["host"].c_str(), port, slaves)));
+    // return new RedisDB(props["host"].c_str(), port, slaves);
   } else if (props["dbname"] == "tbb_rand") {
     return new TbbRandDB;
   } else if (props["dbname"] == "tbb_scan") {

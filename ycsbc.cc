@@ -15,6 +15,8 @@
 #include "core/timer.h"
 #include "core/client.h"
 #include "core/core_workload.h"
+#include "core/db_wrapper.h"
+#include "core/measurements.h"
 #include "db/db_factory.h"
 
 using namespace std;
@@ -22,6 +24,7 @@ using namespace std;
 void UsageMessage(const char *command);
 bool StrStartWith(const char *str, const char *pre);
 string ParseCommandLine(int argc, const char *argv[], utils::Properties &props);
+void export_measurements(ycsbc::MeasurementsExporter* exporter, int total_ops, double duration);
 
 int DelegateClient(ycsbc::DB *db, ycsbc::CoreWorkload *wl, const int num_ops,
     bool is_loading) {
@@ -87,9 +90,19 @@ int main(const int argc, const char *argv[]) {
     sum += n.get();
   }
   double duration = timer.End();
-  cerr << "# Transaction throughput (KTPS)" << endl;
-  cerr << props["dbname"] << '\t' << file_name << '\t' << num_threads << '\t';
-  cerr << total_ops / duration / 1000 << endl;
+  ycsbc::TextMeasurementsExporter exporter;
+  export_measurements(&exporter, total_ops, duration);
+  // cerr << "# Transaction throughput (KTPS)" << endl;
+  // cerr << props["dbname"] << '\t' << file_name << '\t' << num_threads << '\t';
+  // cerr << total_ops / duration / 1000 << endl;
+}
+
+void export_measurements(ycsbc::MeasurementsExporter* exporter, int total_ops, double duration) {
+  exporter->write("OVERALL", "RunTime(ms)", 1000 * duration);
+  exporter->write("OVERALL", "Throughput(ops/sec)", total_ops / duration);
+
+  ycsbc::Measurements::get_measurements().export_measurements(exporter);
+  exporter->print();
 }
 
 string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) {
