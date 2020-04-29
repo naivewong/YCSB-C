@@ -22,7 +22,6 @@ CMakeFiles/
 CPackConfig.cmake
 CPackSourceConfig.cmake
 CTestTestfile.cmake
-Makefile
 Testing/
 cmake_install.cmake
 examples/CMakeFiles/

@@ -184,6 +184,8 @@ OneMeasurementHdrHistogram::~OneMeasurementHdrHistogram() {
     fclose(log_);
   if (&histogram_)
     hdr_interval_recorder_destroy(&histogram_);
+  if (total_histogram_)
+    hdr_close(total_histogram_);
 }
 
 void OneMeasurementHdrHistogram::measure(int latency) {
@@ -215,7 +217,7 @@ void OneMeasurementHdrHistogram::export_measurements(MeasurementsExporter* expor
 
   if (verbose_) {
     struct hdr_iter it;
-    hdr_iter_init(&it, total_histogram_);
+    hdr_iter_recorded_init(&it, total_histogram_);
     while (hdr_iter_next(&it)) {
       exporter->write(get_name(), std::to_string(it.value), (double)(it.count));
     } 
@@ -252,17 +254,19 @@ std::vector<double> OneMeasurementHdrHistogram::get_percentile_values(const std:
   std::string token;
   std::string delimiter = ",";
   while ((pos2 = s.find(delimiter, pos1)) != std::string::npos) {
-    token = s.substr(pos1, pos2);
+    token = s.substr(pos1, pos2 - pos1);
     vals.push_back(std::stod(token));
     pos1 = pos2 + delimiter.length();
   }
+  if (pos1 != s.size())
+    vals.push_back(std::stod(s.substr(pos1, s.size() - pos1)));
   return vals;
 }
 
 struct hdr_histogram* OneMeasurementHdrHistogram::get_interval_histogram_and_accumulate() {
   struct hdr_histogram* interval_histogram = hdr_interval_recorder_sample(&histogram_);
   if (!total_histogram_)
-    total_histogram_ = interval_histogram;
+    total_histogram_ = copy(interval_histogram);
   else
     hdr_add(total_histogram_, interval_histogram);
   return interval_histogram;
@@ -282,6 +286,29 @@ std::string OneMeasurementHdrHistogram::ordinal(double i) {
   }
   else
     return std::to_string(i);
+}
+
+hdr_histogram* OneMeasurementHdrHistogram::copy(hdr_histogram* hdr) {
+  hdr_histogram* histogram = (struct hdr_histogram*) calloc(1, sizeof(struct hdr_histogram));
+  histogram->lowest_trackable_value = hdr->lowest_trackable_value;
+  histogram->highest_trackable_value = hdr->highest_trackable_value;
+  histogram->unit_magnitude = hdr->unit_magnitude;
+  histogram->significant_figures = hdr->significant_figures;
+  histogram->sub_bucket_half_count_magnitude = hdr->sub_bucket_half_count_magnitude;
+  histogram->sub_bucket_half_count = hdr->sub_bucket_half_count;
+  histogram->sub_bucket_mask = hdr->sub_bucket_mask;
+  histogram->sub_bucket_count = hdr->sub_bucket_count;
+  histogram->bucket_count = hdr->bucket_count;
+  histogram->min_value = hdr->min_value;
+  histogram->max_value = hdr->max_value;
+  histogram->normalizing_index_offset = hdr->normalizing_index_offset;
+  histogram->conversion_ratio = hdr->conversion_ratio;
+  histogram->counts_len = hdr->counts_len;
+  histogram->total_count = hdr->total_count;
+  int64_t* counts = (int64_t*) calloc((size_t) hdr->counts_len, sizeof(int64_t));
+  histogram->counts = counts;
+  memcpy(histogram->counts, hdr->counts, (size_t) hdr->counts_len * sizeof(int64_t));
+  return histogram;
 }
 
 thread_local Measurements::StartTimerHolder Measurements::intended_start_time_;

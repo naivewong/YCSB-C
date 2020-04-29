@@ -3,7 +3,7 @@ CFLAGS=-std=c++11 -g -Wall -pthread
 CXXFLAGS=-std=c++11 -g -Wall -pthread -I. -I..
 INCLUDES=-I./
 LDFLAGS= -lpthread -ltbb -lhiredis
-SUBDIRS=core db redis
+SUBDIRS=core db redis third-party/HdrHistogram_c
 SUBSRCS=$(wildcard core/*.cc) $(wildcard db/*.cc)
 OBJECTS=$(SUBSRCS:.cc=.o)
 
@@ -22,13 +22,13 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 ycsbc: ycsbc.cc $(OBJECTS) $(HDR_LIB)
-	$(CC) $(CFLAGS) $(HDR_CFLAGS) $^ $(LDFLAGS) $(HDR_LDFLAGS) $(INCLUDES) $(HDR_INCLUDES) -o $@
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) $(HDR_LDFLAGS) $(INCLUDES) $(HDR_INCLUDES) -o $@
 
 hashmap_test: hashmap_test.cc $(OBJECTS)
 	$(CC) $(CFLAGS) $(INCLUDES) $^ $(LDFLAGS) -o $@
 
 measurements_test: measurements_test.cc $(OBJECTS) $(HDR_LIB)
-	$(CC) $(CFLAGS) $(HDR_CFLAGS) $^ $(LDFLAGS) $(HDR_LDFLAGS) $(INCLUDES) $(HDR_INCLUDES) -o $@
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) $(HDR_LDFLAGS) $(INCLUDES) $(HDR_INCLUDES) -o $@
 
 clean:
 	for dir in $(SUBDIRS); do \

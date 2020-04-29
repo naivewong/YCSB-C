@@ -194,6 +194,8 @@ private:
 
   std::string ordinal(double i);
 
+  hdr_histogram* copy(hdr_histogram* hdr);
+
 public:
   std::string PERCENTILES_PROPERTY = "hdrhistogram.percentiles";
   std::string PERCENTILES_PROPERTY_DEFAULT = "95,99";

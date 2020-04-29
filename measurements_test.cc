@@ -32,7 +32,7 @@ void test_OneMeasurementHistogram() {
   std::cout << m.get_summary() << std::endl << std::endl;
 
   m.export_measurements(&exporter);
-  // std::cout << exporter.buf() << std::endl;
+  std::cout << exporter.buf() << std::endl;
 }
 
 void test_OneMeasurementHdrHistogram() {
@@ -49,7 +49,7 @@ void test_OneMeasurementHdrHistogram() {
   std::cout << m.get_summary() << std::endl << std::endl;
 
   m.export_measurements(&exporter);
-  // std::cout << exporter.buf() << std::endl;
+  std::cout << exporter.buf() << std::endl;
 }
 
 void test_Measurements() {
@@ -69,12 +69,12 @@ void test_Measurements() {
   std::cout << m.get_summary() << std::endl << std::endl;
 
   m.export_measurements(&exporter);
-  // std::cout << exporter.buf() << std::endl;
+  std::cout << exporter.buf() << std::endl;
 }
 
 int main() {
-  // test_OneMeasurementRaw();
-  // test_OneMeasurementHistogram();
-  // test_OneMeasurementHdrHistogram();
+  test_OneMeasurementRaw();
+  test_OneMeasurementHistogram();
+  test_OneMeasurementHdrHistogram();
   test_Measurements();
 }
