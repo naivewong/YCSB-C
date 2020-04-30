@@ -17,10 +17,10 @@ public:
   void Init() { db_->Init(); }
   void Close() {
     uint64_t ist = Measurements::get_measurements().get_intended_start_time_ns();
-    uint64_t st = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t st = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     db_->Close();
-    uint64_t en = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t en = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     measure("CLEANUP", 0, ist, st, en);
   }
@@ -29,10 +29,10 @@ public:
                    const std::vector<std::string> *fields,
                    std::vector<KVPair> &result) override {
     uint64_t ist = Measurements::get_measurements().get_intended_start_time_ns();
-    uint64_t st = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t st = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     int res = db_->Read(table, key, fields, result);
-    uint64_t en = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t en = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     measure("READ", res, ist, st, en);
     Measurements::get_measurements().report_status("READ", res);
@@ -43,10 +43,10 @@ public:
                    int record_count, const std::vector<std::string> *fields,
                    std::vector<std::vector<KVPair>> &result) override {
     uint64_t ist = Measurements::get_measurements().get_intended_start_time_ns();
-    uint64_t st = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t st = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     int res = db_->Scan(table, key, record_count, fields, result);
-    uint64_t en = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t en = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     measure("SCAN", res, ist, st, en);
     Measurements::get_measurements().report_status("SCAN", res);
@@ -56,10 +56,10 @@ public:
   virtual int Update(const std::string &table, const std::string &key,
                      std::vector<KVPair> &values) override {
     uint64_t ist = Measurements::get_measurements().get_intended_start_time_ns();
-    uint64_t st = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t st = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     int res = db_->Update(table, key, values);
-    uint64_t en = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t en = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     measure("UPDATE", res, ist, st, en);
     Measurements::get_measurements().report_status("UPDATE", res);
@@ -69,10 +69,10 @@ public:
   virtual int Insert(const std::string &table, const std::string &key,
                      std::vector<KVPair> &values) override {
     uint64_t ist = Measurements::get_measurements().get_intended_start_time_ns();
-    uint64_t st = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t st = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     int res = db_->Insert(table, key, values);
-    uint64_t en = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t en = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     measure("INSERT", res, ist, st, en);
     Measurements::get_measurements().report_status("INSERT", res);
@@ -81,10 +81,10 @@ public:
 
   virtual int Delete(const std::string &table, const std::string &key) override {
     uint64_t ist = Measurements::get_measurements().get_intended_start_time_ns();
-    uint64_t st = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t st = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     int res = db_->Delete(table, key);
-    uint64_t en = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t en = std::chrono::duration_cast<std::chrono::nanoseconds>(
           std::chrono::system_clock::now().time_since_epoch()).count();
     measure("DELETE", res, ist, st, en);
     Measurements::get_measurements().report_status("DELETE", res);

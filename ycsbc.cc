@@ -101,6 +101,7 @@ void export_measurements(ycsbc::MeasurementsExporter* exporter, int total_ops, d
   exporter->write("OVERALL", "RunTime(ms)", 1000 * duration);
   exporter->write("OVERALL", "Throughput(ops/sec)", total_ops / duration);
 
+  cout << ycsbc::Measurements::get_measurements().get_summary() << endl;
   ycsbc::Measurements::get_measurements().export_measurements(exporter);
   exporter->print();
 }

@@ -61,13 +61,14 @@ public:
     std::unordered_map<int, std::atomic<int>>::iterator counter = return_codes_.find(status);
     if (counter != return_codes_.end())
       counter->second.fetch_add(1);
-    return_codes_.emplace(status, 1);
+    else
+      return_codes_.emplace(status, 1);
   }
 
   void export_status_counts(MeasurementsExporter* exporter) {
     ReadLock lock(&rwlock_);
     for (auto& p : return_codes_)
-      exporter->write(name_, "Return=" + p.first, p.second.load());
+      exporter->write(name_, "Return=" + std::to_string(p.first), p.second.load());
   }
 
   virtual void measure(int latency)=0;

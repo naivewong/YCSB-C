@@ -40,3 +40,4 @@
 redis/sample
 ycsbc
 measurements_test
+*.hdr

@@ -12,7 +12,7 @@ HDR_INCLUDES=-I./third-party/HdrHistogram_c/src
 HDR_LDFLAGS=-lz -lm
 HDR_CFLAGS=-Wall -Wno-unknown-pragmas -Wextra -Wshadow -Winit-self -Wpedantic -D_GNU_SOURCE -fPIC
 
-.PHONY: measurements_test dependency
+.PHONY: measurements_test dependency ycsbc
 
 all: dependency ycsbc
 

@@ -4,6 +4,8 @@ CXXFLAGS=-std=c++11 -c -g -Wall -I.. -I.
 SOURCES=$(wildcard *.cc)
 OBJECTS=$(SOURCES:.cc=.o)
 
+.PHONY: $(OBJECTS)
+
 all: $(SOURCES) $(OBJECTS)
 
 .cc.o:
