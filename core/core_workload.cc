@@ -19,7 +19,7 @@ using ycsbc::CoreWorkload;
 using std::string;
 
 const string CoreWorkload::TABLENAME_PROPERTY = "table";
-const string CoreWorkload::TABLENAME_DEFAULT = "usertable";
+const string CoreWorkload::TABLENAME_DEFAULT = "default";
 
 const string CoreWorkload::FIELD_COUNT_PROPERTY = "fieldcount";
 const string CoreWorkload::FIELD_COUNT_DEFAULT = "10";

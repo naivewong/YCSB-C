@@ -19,6 +19,18 @@ all: simple_example column_families_example compact_files_example c_simple_examp
 simple_example: librocksdb simple_example.cc
 	$(CXX) $(CXXFLAGS) $@.cc -o$@ ../librocksdb.a -I../include -O2 -std=c++11 $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS) $(EXEC_LDFLAGS)
 
+scan_example: librocksdb scan_example.cc
+	@echo "----------------------------------------"
+	@echo "CXXFLAGS", $(CXXFLAGS)
+	@echo "----------------------------------------"
+	@echo "PLATFORM_CXXFLAGS", $(PLATFORM_CXXFLAGS)
+	@echo "----------------------------------------"
+	@echo "PLATFORM_LDFLAGS", $(PLATFORM_LDFLAGS)
+	@echo "----------------------------------------"
+	@echo "EXEC_LDFLAGS", $(EXEC_LDFLAGS) 
+	@echo "----------------------------------------"
+	$(CXX) $(CXXFLAGS) $@.cc -o$@ ../librocksdb.a -I../include -O2 -std=c++11 $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS) $(EXEC_LDFLAGS)
+
 column_families_example: librocksdb column_families_example.cc
 	$(CXX) $(CXXFLAGS) $@.cc -o$@ ../librocksdb.a -I../include -O2 -std=c++11 $(PLATFORM_LDFLAGS) $(PLATFORM_CXXFLAGS) $(EXEC_LDFLAGS)
 

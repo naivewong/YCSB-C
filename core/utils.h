@@ -47,6 +47,21 @@ inline char RandomPrintChar() {
   return rand() % 94 + 33;
 }
 
+// Big endian.
+inline void encode_int(char* temp, int i) {
+  temp[0] = (i >> 24);
+  temp[1] = (i >> 16) & 0xff;
+  temp[2] = (i >> 8) & 0xff;
+  temp[3] = i & 0xff;
+}
+
+inline int decode_int(const char* temp) {
+  return ((int)(temp[0]) << 24) +
+         ((int)(temp[1]) << 16) +
+         ((int)(temp[2]) << 8) +
+         (int)(temp[3]);
+}
+
 class Exception : public std::exception {
  public:
   Exception(const std::string &message) : message_(message) { }
