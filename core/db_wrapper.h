@@ -11,6 +11,9 @@ namespace ycsbc {
 class DBWrapper: public DB {
 public:
   DBWrapper(const std::shared_ptr<DB>& db): db_(db) {}
+  ~DBWrapper() {
+    db_.reset();
+  }
   void set_properties(const utils::Properties& props) { db_->set_properties(props); }
   utils::Properties get_properties() { return db_->get_properties(); }
 
