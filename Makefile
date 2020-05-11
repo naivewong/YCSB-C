@@ -40,9 +40,6 @@ $(SUBDIRS):
 ycsbc: ycsbc.cc db/rocksdb_db.cc db/rocksdb_cloud_db.cc db/db_factory.cc $(OBJECTS) $(HDR_LIB) $(ROCKSDB_LIB)
 	$(CC) $(CFLAGS) $^ -O2 $(LDFLAGS) $(HDR_LDFLAGS) $(ROCKSDB_PLATFORM_LDFLAGS) $(INCLUDES) $(HDR_INCLUDES) $(ROCKSDB_INCLUDES) $(ROCKSDB_CXXFLAGS) $(ROCKSDB_PLATFORM_CXXFLAGS) $(ROCKSDB_CLOUD_PLATFORM_CXXFLAGS) $(ROCKSDB_EXEC_LDFLAGS) $(ROCKSDB_CLOUD_LDFLAGS) -o $@
 
-hashmap_test: hashmap_test.cc $(OBJECTS)
-	$(CC) $(CFLAGS) $(INCLUDES) $^ $(LDFLAGS) -o $@
-
 measurements_test: measurements_test.cc $(OBJECTS) $(HDR_LIB)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) $(HDR_LDFLAGS) $(INCLUDES) $(HDR_INCLUDES) -o $@
 
