@@ -57,41 +57,50 @@ int main(const int argc, const char *argv[]) {
 
   const int num_threads = stoi(props.GetProperty("threadcount", "1"));
 
-  // Loads data
-  vector<future<int>> actual_ops;
-  int total_ops = stoi(props[ycsbc::CoreWorkload::RECORD_COUNT_PROPERTY]);
-  for (int i = 0; i < num_threads; ++i) {
-    actual_ops.emplace_back(async(launch::async,
-        DelegateClient, db, &wl, total_ops / num_threads, true));
-  }
-  assert((int)actual_ops.size() == num_threads);
-
-  int sum = 0;
-  for (auto &n : actual_ops) {
-    assert(n.valid());
-    sum += n.get();
-  }
-  cerr << "# Loading records:\t" << sum << endl;
-
-  // Peforms transactions
-  actual_ops.clear();
-  total_ops = stoi(props[ycsbc::CoreWorkload::OPERATION_COUNT_PROPERTY]);
   utils::Timer<double> timer;
   timer.Start();
-  for (int i = 0; i < num_threads; ++i) {
-    actual_ops.emplace_back(async(launch::async,
-        DelegateClient, db, &wl, total_ops / num_threads, false));
-  }
-  assert((int)actual_ops.size() == num_threads);
 
-  sum = 0;
-  for (auto &n : actual_ops) {
-    assert(n.valid());
-    sum += n.get();
+  if (props.GetProperty("command", "NULL") == "load") {
+    // Loads data
+    vector<future<int>> actual_ops;
+    int total_ops = stoi(props[ycsbc::CoreWorkload::RECORD_COUNT_PROPERTY]);
+    for (int i = 0; i < num_threads; ++i) {
+      actual_ops.emplace_back(async(launch::async,
+          DelegateClient, db, &wl, total_ops / num_threads, true));
+    }
+    assert((int)actual_ops.size() == num_threads);
+
+    int sum = 0;
+    for (auto &n : actual_ops) {
+      assert(n.valid());
+      sum += n.get();
+    }
+    cerr << "# Loading records:\t" << sum << endl;
+    double duration = timer.End();
+    ycsbc::TextMeasurementsExporter exporter;
+    export_measurements(&exporter, total_ops, duration);
   }
-  double duration = timer.End();
-  ycsbc::TextMeasurementsExporter exporter;
-  export_measurements(&exporter, total_ops, duration);
+
+  if (props.GetProperty("command", "NULL") == "run") {
+    // Peforms transactions
+    vector<future<int>> actual_ops;
+    int total_ops = stoi(props[ycsbc::CoreWorkload::OPERATION_COUNT_PROPERTY]);
+    for (int i = 0; i < num_threads; ++i) {
+      actual_ops.emplace_back(async(launch::async,
+          DelegateClient, db, &wl, total_ops / num_threads, false));
+    }
+    assert((int)actual_ops.size() == num_threads);
+
+    int sum = 0;
+    for (auto &n : actual_ops) {
+      assert(n.valid());
+      sum += n.get();
+    }
+    cerr << "# Transaction numbers:\t" << sum << endl;
+    double duration = timer.End();
+    ycsbc::TextMeasurementsExporter exporter;
+    export_measurements(&exporter, total_ops, duration);
+  }
   // cerr << "# Transaction throughput (KTPS)" << endl;
   // cerr << props["dbname"] << '\t' << file_name << '\t' << num_threads << '\t';
   // cerr << total_ops / duration / 1000 << endl;
@@ -110,6 +119,20 @@ void export_measurements(ycsbc::MeasurementsExporter* exporter, int total_ops, d
 string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) {
   int argindex = 1;
   string filename;
+  if (argindex < argc) {
+    if (strcmp(argv[argindex], "load") == 0)
+      props.SetProperty("command", "load");
+    else if (strcmp(argv[argindex], "run") == 0)
+      props.SetProperty("command", "run");
+    else {
+      UsageMessage(argv[0]);
+      exit(0);
+    }
+    argindex++;
+  } else {
+    UsageMessage(argv[0]);
+    exit(0);
+  }
   while (argindex < argc && StrStartWith(argv[argindex], "-")) {
     if (strcmp(argv[argindex], "-threads") == 0) {
       argindex++;
@@ -182,7 +205,10 @@ string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) 
 }
 
 void UsageMessage(const char *command) {
-  cout << "Usage: " << command << " [options]" << endl;
+  cout << "Usage: " << command << " command [options]" << endl;
+  cout << "Command:" << endl;
+  cout << "  load: load data into database" << endl;
+  cout << "  run: run the workloads" << endl;
   cout << "Options:" << endl;
   cout << "  -threads n: execute using n threads (default: 1)" << endl;
   cout << "  -db dbname: specify the name of the DB to use (default: basic)" << endl;
