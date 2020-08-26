@@ -94,5 +94,5 @@ class RocksdbCloudDB : public DB {
 
 } // ycsbc
 
-#endif // YCSB_C_REDIS_DB_H_
+#endif // YCSB_C_ROCKSDB_CLOUD_DB_H_
 

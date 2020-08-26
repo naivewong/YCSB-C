@@ -14,7 +14,6 @@
 #include <string>
 #include "db/basic_db.h"
 #include "db/lock_stl_db.h"
-#include "db/redis_db.h"
 #include "db/rocksdb_db.h"
 #include "db/rocksdb_cloud_db.h"
 // #include "db/tbb_rand_db.h"
@@ -35,11 +34,6 @@ DB* DBFactory::CreateDB(utils::Properties &props) {
     return new BasicDB;
   } else if (props["dbname"] == "lock_stl") {
     return new LockStlDB;
-  } else if (props["dbname"] == "redis") {
-    int port = stoi(props["port"]);
-    int slaves = stoi(props["slaves"]);
-    return new DBWrapper(std::shared_ptr<DB>(new RedisDB(props["host"].c_str(), port, slaves)));
-    // return new RedisDB(props["host"].c_str(), port, slaves);
   } else if (props["dbname"] == "rocksdb") {
     rocksdb::Options options;
     options.OptimizeLevelStyleCompaction();
