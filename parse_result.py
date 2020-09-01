@@ -11,9 +11,9 @@ __email__ = "jinglei@ren.systems"
 
 def main():
     if len(sys.argv) != 2 or sys.argv[1] == '-h':
-        print("Usage: %s OutputFileName" % sys.argv[0])
-        print("Statistics (.result file) for each workload " + \
-              "will be written to the workload directory.")
+        print "Usage: %s OutputFileName" % sys.argv[0]
+        print "Statistics (.result file) for each workload " + \
+              "will be written to the workload directory."
         sys.exit(-1)
 
     path = sys.argv[1]
@@ -38,11 +38,11 @@ def main():
         tn_index.add(num_threads)
 
         throughput = float(line[3])
-        if workload not in results:
+        if not results.has_key(workload):
             results[workload] = {}
-        if db_name not in results[workload]:
+        if not results[workload].has_key(db_name):
             results[workload][db_name] = {}
-        if num_threads not in results[workload][db_name]:
+        if not results[workload][db_name].has_key(num_threads):
             results[workload][db_name][num_threads] = []
         results[workload][db_name][num_threads].append(throughput)
 

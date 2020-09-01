@@ -15,8 +15,6 @@
 #include "core/timer.h"
 #include "core/client.h"
 #include "core/core_workload.h"
-#include "core/db_wrapper.h"
-#include "core/measurements.h"
 #include "db/db_factory.h"
 
 using namespace std;
@@ -24,7 +22,6 @@ using namespace std;
 void UsageMessage(const char *command);
 bool StrStartWith(const char *str, const char *pre);
 string ParseCommandLine(int argc, const char *argv[], utils::Properties &props);
-void export_measurements(ycsbc::MeasurementsExporter* exporter, int total_ops, double duration);
 
 int DelegateClient(ycsbc::DB *db, ycsbc::CoreWorkload *wl, const int num_ops,
     bool is_loading) {
@@ -57,82 +54,47 @@ int main(const int argc, const char *argv[]) {
 
   const int num_threads = stoi(props.GetProperty("threadcount", "1"));
 
+  // Loads data
+  vector<future<int>> actual_ops;
+  int total_ops = stoi(props[ycsbc::CoreWorkload::RECORD_COUNT_PROPERTY]);
+  for (int i = 0; i < num_threads; ++i) {
+    actual_ops.emplace_back(async(launch::async,
+        DelegateClient, db, &wl, total_ops / num_threads, true));
+  }
+  assert((int)actual_ops.size() == num_threads);
+
+  int sum = 0;
+  for (auto &n : actual_ops) {
+    assert(n.valid());
+    sum += n.get();
+  }
+  cerr << "# Loading records:\t" << sum << endl;
+
+  // Peforms transactions
+  actual_ops.clear();
+  total_ops = stoi(props[ycsbc::CoreWorkload::OPERATION_COUNT_PROPERTY]);
   utils::Timer<double> timer;
   timer.Start();
-
-  if (props.GetProperty("command", "NULL") == "load") {
-    // Loads data
-    vector<future<int>> actual_ops;
-    int total_ops = stoi(props[ycsbc::CoreWorkload::RECORD_COUNT_PROPERTY]);
-    for (int i = 0; i < num_threads; ++i) {
-      actual_ops.emplace_back(async(launch::async,
-          DelegateClient, db, &wl, total_ops / num_threads, true));
-    }
-    assert((int)actual_ops.size() == num_threads);
-
-    int sum = 0;
-    for (auto &n : actual_ops) {
-      assert(n.valid());
-      sum += n.get();
-    }
-    cerr << "# Loading records:\t" << sum << endl;
-    double duration = timer.End();
-    ycsbc::TextMeasurementsExporter exporter;
-    export_measurements(&exporter, total_ops, duration);
+  for (int i = 0; i < num_threads; ++i) {
+    actual_ops.emplace_back(async(launch::async,
+        DelegateClient, db, &wl, total_ops / num_threads, false));
   }
+  assert((int)actual_ops.size() == num_threads);
 
-  if (props.GetProperty("command", "NULL") == "run") {
-    // Peforms transactions
-    vector<future<int>> actual_ops;
-    int total_ops = stoi(props[ycsbc::CoreWorkload::OPERATION_COUNT_PROPERTY]);
-    for (int i = 0; i < num_threads; ++i) {
-      actual_ops.emplace_back(async(launch::async,
-          DelegateClient, db, &wl, total_ops / num_threads, false));
-    }
-    assert((int)actual_ops.size() == num_threads);
-
-    int sum = 0;
-    for (auto &n : actual_ops) {
-      assert(n.valid());
-      sum += n.get();
-    }
-    cerr << "# Transaction numbers:\t" << sum << endl;
-    double duration = timer.End();
-    ycsbc::TextMeasurementsExporter exporter;
-    export_measurements(&exporter, total_ops, duration);
+  sum = 0;
+  for (auto &n : actual_ops) {
+    assert(n.valid());
+    sum += n.get();
   }
-  // cerr << "# Transaction throughput (KTPS)" << endl;
-  // cerr << props["dbname"] << '\t' << file_name << '\t' << num_threads << '\t';
-  // cerr << total_ops / duration / 1000 << endl;
-  delete db;
-}
-
-void export_measurements(ycsbc::MeasurementsExporter* exporter, int total_ops, double duration) {
-  exporter->write("OVERALL", "RunTime(ms)", 1000 * duration);
-  exporter->write("OVERALL", "Throughput(ops/sec)", total_ops / duration);
-
-  cout << ycsbc::Measurements::get_measurements().get_summary() << endl;
-  ycsbc::Measurements::get_measurements().export_measurements(exporter);
-  exporter->print();
+  double duration = timer.End();
+  cerr << "# Transaction throughput (KTPS)" << endl;
+  cerr << props["dbname"] << '\t' << file_name << '\t' << num_threads << '\t';
+  cerr << total_ops / duration / 1000 << endl;
 }
 
 string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) {
   int argindex = 1;
   string filename;
-  if (argindex < argc) {
-    if (strcmp(argv[argindex], "load") == 0)
-      props.SetProperty("command", "load");
-    else if (strcmp(argv[argindex], "run") == 0)
-      props.SetProperty("command", "run");
-    else {
-      UsageMessage(argv[0]);
-      exit(0);
-    }
-    argindex++;
-  } else {
-    UsageMessage(argv[0]);
-    exit(0);
-  }
   while (argindex < argc && StrStartWith(argv[argindex], "-")) {
     if (strcmp(argv[argindex], "-threads") == 0) {
       argindex++;
@@ -205,10 +167,7 @@ string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) 
 }
 
 void UsageMessage(const char *command) {
-  cout << "Usage: " << command << " command [options]" << endl;
-  cout << "Command:" << endl;
-  cout << "  load: load data into database" << endl;
-  cout << "  run: run the workloads" << endl;
+  cout << "Usage: " << command << " [options]" << endl;
   cout << "Options:" << endl;
   cout << "  -threads n: execute using n threads (default: 1)" << endl;
   cout << "  -db dbname: specify the name of the DB to use (default: basic)" << endl;

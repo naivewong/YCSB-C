@@ -1,10 +1,7 @@
 CC=g++
-CFLAGS=-std=c++11 -c -g -Wall -I.. -I.
-CXXFLAGS=-std=c++11 -c -g -Wall -I.. -I.
+CFLAGS=-std=c++11 -c -g -Wall
 SOURCES=$(wildcard *.cc)
 OBJECTS=$(SOURCES:.cc=.o)
-
-.PHONY: $(OBJECTS)
 
 all: $(SOURCES) $(OBJECTS)
 
