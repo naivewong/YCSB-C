@@ -56,10 +56,10 @@ inline void encode_int(char* temp, int i) {
 }
 
 inline int decode_int(const char* temp) {
-  return ((int)(temp[0]) << 24) +
-         ((int)(temp[1]) << 16) +
-         ((int)(temp[2]) << 8) +
-         (int)(temp[3]);
+  return (int)(((unsigned int)((uint8_t)(temp[0])) << 24) +
+         ((unsigned int)((uint8_t)(temp[1])) << 16) +
+         ((unsigned int)((uint8_t)(temp[2])) << 8) +
+         (unsigned int)((uint8_t)(temp[3])));
 }
 
 class Exception : public std::exception {
