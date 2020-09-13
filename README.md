@@ -3,6 +3,8 @@
 Yahoo! Cloud Serving Benchmark in C++, a C++ version of YCSB (https://github.com/brianfrankcooper/YCSB/wiki)
 
 ## New Feature
+Add load -
+`$ ./ycsbc load -db rocksdb -threads 1 -P ./workloads/workloada.spec`
 Add HDR histogram. For example -
 ```
 # Loading records:	100000
@@ -22,7 +24,6 @@ Add HDR histogram. For example -
 [READ], 4, 13066.000000
 .......
 ```
-
 
 ## RocksDB
 Folder rocksdb-cloud contains a RocksDB v6.5.2. If you want to test the latest RocksDB, you can replace the folder with the latest RocksDB.  

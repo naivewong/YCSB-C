@@ -55,6 +55,7 @@ int RocksdbCloudDB::Scan(const std::string &table, const std::string &key,
     it->Next();
     iterations++;
   }
+  delete it;
   return DB::kOK;
 }
 
